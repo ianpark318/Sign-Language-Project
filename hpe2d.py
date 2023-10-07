@@ -24,62 +24,66 @@ cap = cv2.VideoCapture(0)
 pre_time = 0
 
 hands_keypoints = []
-translation_flag = True
+translation_flag = False
 data_on_frame = []
 
 cnt = 0
 
-with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
-    while cap.isOpened():
-        ret, frame = cap.read()
-        
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+# with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
+while cap.isOpened():
+    ret, frame = cap.read()
+    
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        image.flags.writeable = False
+    image.flags.writeable = False
 
-        results = hands.process(image)
+    # results = hands.process(image)
 
-        image.flags.writeable = True
+    image.flags.writeable = True
 
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        # pre_time = display_fps(pre_time, image)   # fps 표기
-        
-        if results.multi_hand_landmarks:
-            if translation_flag:
-                for num_hand, classification in enumerate(results.multi_handedness):
-                    if num_hand == 0:
-                        data_on_frame.append([classification, results.multi_hand_landmarks[0:21]])
-                    else:
-                        data_on_frame[-1].extend([classification, results.multi_hand_landmarks[21:]])
-                hands_keypoints.append(data_on_frame)
+    pre_time = display_fps(pre_time, image)   # fps 표기
+    
+    # if results.multi_hand_landmarks:
+    #     if translation_flag:
+    #         for num_hand, hand_type in enumerate(results.multi_handedness):
+    #             hand_type = hand_type.classification[0].index
+    #             if num_hand == 0:
+    #                 data_on_frame.append([hand_type, results.multi_hand_landmarks][0])
+    #             else:
+    #                 data_on_frame.extend([hand_type, results.multi_hand_landmarks][1])
+    #         hands_keypoints.append(data_on_frame)
 
-            # print(results.multi_handedness)
-            for num, hand in enumerate(results.multi_hand_landmarks):
-                mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS)
-                if cnt == 0:
-                    cnt+=1
-                    print(hand)
-                    print('ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ')         
-                    print(hands_keypoints)
+    #     # print(results.multi_handedness)
+    #     for num, hand in enumerate(results.multi_hand_landmarks):
+    #         mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS)
+    #         if cnt == 0:
+    #             cnt+=1
+    #             # print(hand)
+    #             # print('ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ')         
+    #             # print(hands_keypoints)
 
 
-        
+    
 
-        cv2.imshow('Hand Tracking', image)
+    cv2.imshow('Hand Tracking', image)
+    key_queue = cv2.waitKey(1)
+    if (key_queue & 0xFF == ord('s')) and translation_flag == False:
+        print('Start recording')
+        translation_flag = True
+        key_queue = 0
+    
+    if (key_queue & 0xFF == ord('e')) and translation_flag == True:
+        print('Save record...')
+        translation_flag = False
+        # sign_language_translator(hands_keypoints)
+        print('End recording')
+        key_queue = 0
 
-        if cv2.waitKey(10) & 0xFF == ord('s'):
-            print('Start recording')
-            translation_flag = True
-        
-        if cv2.waitKey(10) & 0xFF == ord('e'):
-            translation_flag = False
-            # sign_language_translator(hands_keypoints)
-            print('End recording')
+        with open('keypoints.json', 'w') as f:
+            json.dump({'keypoint_sequence' : hands_keypoints}, f, default=str, indent='\t')
+        hands_keypoints = []
 
-            with open('keypoints.json', 'w') as f:
-                json.dump({'keypoint_sequence' : hands_keypoints}, f, default=str, indent='\t')
-            hands_keypoints = []
-
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
+    if key_queue & 0xFF == ord('q'):
+        break
