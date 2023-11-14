@@ -77,7 +77,7 @@ class TrainerModule(pl.LightningModule):
 class DataModule(pl.LightningDataModule):
     def __init__(self, batch_size: int = 4):
         super().__init__()
-        self.keyp_path = "/home/jaehyeong/Sign-Language-Project/our_data"
+        self.keyp_path = "/home/jaehyeong/capstone-2023-1-07/our_data"
         self.batch_size = batch_size
 
     def setup(self, stage=None):
@@ -93,13 +93,13 @@ class DataModule(pl.LightningDataModule):
             shuffle=True,
         )
 
-    def val_dataloader(self):
-        return DataLoader(
-            self.nia_val,
-            batch_size=self.batch_size,
-            num_workers=10,
-            collate_fn=custom_collate,
-        )
+    # def val_dataloader(self):
+    #     return DataLoader(
+    #         self.nia_val,
+    #         batch_size=self.batch_size,
+    #         num_workers=10,
+    #         collate_fn=custom_collate,
+    #     )
 
 
 if __name__ == "__main__":

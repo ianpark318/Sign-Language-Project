@@ -17,7 +17,7 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
     mp_drawing = mp.solutions.drawing_utils
     mp_hands = mp.solutions.hands
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(4)
 
     w = 640
     h = 480
@@ -36,10 +36,11 @@ if __name__ == "__main__":
         "눈",
         "당신",
         "식사하셨어요?",
-        "이름이 뭐 예요?"
-        #"수어",
-        #"사랑",
-        #"만나서 반가워요!",
+        "이름이 뭐 예요?",
+        "사랑",
+        "수어",
+        "만나서 반가워요!",
+        "다시 한번 수어를 입력해주세요!",
     ]
     model = InferModel().load_from_checkpoint(checkpoint_path=ckpt_name)
     model.eval().to("cuda")
@@ -80,7 +81,7 @@ if __name__ == "__main__":
                 for num, hand in enumerate(results.multi_hand_landmarks):
                     mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS)
 
-            image = drawUI(image, ui_img, np.zeros((100,w,3),np.uint8))
+            image = drawUI(image, ui_img, np.zeros((100, w, 3), np.uint8))
 
             if display_flag:
                 image = display_label(labels, image, w, h)
@@ -113,10 +114,15 @@ if __name__ == "__main__":
                     )
                 keypoint_sequence = torch.cat(keypoint_sequence, dim=0)
                 input_data = keypoint_sequence.unsqueeze(0).to("cuda")
-                print(keypoint_sequence.shape)
                 output = model(input_data)
+                output = torch.softmax(output, dim=1)
                 labels = torch.max(output, dim=1)[1][0]
+                th = torch.max(output, dim=1)[0][0]
+                th = th / torch.sum(th)
                 labels = korean[labels]
+                # print(th, labels)
+                # if th < 0.85:
+                #     labels = korean[-1]
                 display_flag = True
                 hands_keypoints = []
 

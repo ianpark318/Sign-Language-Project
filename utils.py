@@ -5,8 +5,9 @@ from PIL import ImageFont, ImageDraw, Image
 import numpy as np
 
 
-fontpath = "/usr/share/fonts/truetype/nanum/NanumBarunpenB.ttf"
+fontpath = "NanumBarunpenB.ttf"
 font = ImageFont.truetype(fontpath, 50)
+
 
 def landmarkxy2list(
     landmarks_list: landmark_pb2.NormalizedLandmarkList,
@@ -18,30 +19,21 @@ def landmarkxy2list(
     return result_list
 
 
-def display_fps(pre_time, image):
-    curr_time = time.time()
-    t = curr_time - pre_time
-    fps = 1 / t
-
-    cv2.putText(
-        image, f"fps: {fps}", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0)
-    )
-    return curr_time
-
 def make_ui_img(w):
-    ui_img = np.zeros((100,w,3),np.uint8)
-    
-    b,g,r,a = 255,255,255,0
+    ui_img = np.zeros((100, w, 3), np.uint8)
+
+    b, g, r, a = 255, 255, 255, 0
 
     ui_img_pil = Image.fromarray(ui_img)
     draw_top = ImageDraw.Draw(ui_img_pil)
 
     guide_message = "카메라를 향해 수어를 해보세요!"
 
-    draw_top.text((w/2, 50), guide_message, anchor='mm', font=font, fill=(b,g,r,a))
+    draw_top.text((w / 2, 50), guide_message, anchor="mm", font=font, fill=(b, g, r, a))
     ui_img = np.array(ui_img_pil)
 
     return ui_img
+
 
 def drawUI(img, ui_img, subtitle_bg):
     stacked_img = cv2.vconcat([ui_img, img])
@@ -49,12 +41,13 @@ def drawUI(img, ui_img, subtitle_bg):
 
     return stacked_img
 
+
 def display_label(label, image, w, h):
-    b,g,r,a = 255,255,255,0
+    b, g, r, a = 255, 255, 255, 0
 
     img_pil = Image.fromarray(image)
     draw = ImageDraw.Draw(img_pil)
-    draw.text((w/2, h+100+50), label, anchor='mm', font=font, fill=(b,g,r,a))
+    draw.text((w / 2, h + 100 + 50), label, anchor="mm", font=font, fill=(b, g, r, a))
     img = np.array(img_pil)
 
     return img

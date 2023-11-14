@@ -16,7 +16,7 @@ class OurDataset(Dataset):
         self.keyp_path = keyp_path
 
         self.inputs = []
-        data_num = 25  # How many datas per words?
+        data_num = 50  # How many datas per words?
         class_num = cfg["num_classes"]
         t = []
         for i in range(class_num):
@@ -45,7 +45,6 @@ class OurDataset(Dataset):
                 self.inputs.append(keypoint_sequence)
 
         self.inputs = torch.cat(self.inputs, dim=0)
-        print(self.inputs.shape, self.labels.shape)
 
     def __getitem__(self, idx):
         return {
